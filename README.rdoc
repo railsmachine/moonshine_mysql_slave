@@ -1,14 +1,95 @@
-= Moonshine_MysqlSlave
+== Moonshine MySQL Slaves Plugin
 
 === A plugin for Moonshine[http://github.com/railsmachine/moonshine]
 
-A plugin for installing and managing mysql_slave.
+This plugin assists with installing and managing MySQL slave configuration, as
+well as online, non-blocking snapshot back-ups with XtraBackup[http://www.percona.com/docs/wiki/percona-xtrabackup:start].
+
+=== Infrastructure Assumptions
+
+Currently this plugin operates on a few assumptions:
+
+1. The master and all slaves are accessible to Capistrano either publicly or
+   through a gateway[http://weblog.jamisbuck.org/2006/9/26/inside-capistrano-the-gateway-implementation]
+   that you have already configured. You may specify IPs or hostnames for the
+   slaves.
+1. The slaves use a consistent interface for the network over which they
+   communicate with the master (e.g. all use eth1). This does not have to match
+   the IP/hostname you give for the slave, and it is recommended that you use a
+   private network.
+
+If you need a more flexible configuration, patches are welcome :-)
 
 === Instructions
 
-* <tt>script/plugin install git://github.com/ACCOUNT/moonshine_mysql_slave.git</tt>
-* Configure settings if needed
-    configure(:mysql_slave => {:foo => true})
-* Include the plugin and recipe(s) in your Moonshine manifest
+These assume you have already have an application in production and are adding
+a slave configuration. Follow these closely -- order is significant.
+
+* <tt>script/plugin install git://github.com/railsmachine/moonshine_mysql_slave.git</tt>
+* <tt>script/plugin install git://github.com/railsmachine/moonshine_mysql_tools.git</tt>
+* Configure settings using the <tt>mysql</tt> configuration hash -- you'll need
+  to set the IPs or hostnames of your slaves and the interface MySQL should
+  listen on for both master and slaves:
+    :mysql:
+      :master_interface: eth2 # these default to eth1
+      :slaves_interface: eth0
+      :slaves:
+        - slave1.example.com
+        - 10.0.4.3
+  <em>NOTE: Currently you must configure the slaves array in <tt>moonshine.yml</tt>,
+  not via the <tt>configure</tt> method in your manifest. This is the only way
+  Moonshine configuration is accessible in Capistrano recipes currently.</em>
+* Edit <tt>database.yml</tt> to set your DB host to the address of the master
+  interface, if it is currently set to localhost.
+* Include the plugin and recipe(s) in your Moonshine manifest, *before* the
+  <tt>default_stack</tt> recipe is called.
+    plugin :mysql_tools
+    recipe :mysql_tools
     plugin :mysql_slave
     recipe :mysql_slave
+* <tt>cap deploy:setup HOSTFILTER=slave1.example.com,10.0.4.3</tt>
+* <tt>cap deploy HOSTFILTER=slave1.example.com,10.0.4.3</tt>
+* <tt>cap db:replication:setup</tt> -- This will momentarily lock tables!
+* <tt>cap deploy HOSTFILTER=master-db.example.com</tt> -- This will trigger a
+  MySQL restart if you're changing the bind address for the first time.
+
+=== Security
+
+We *strongly* recommend that you configure a firewall, especially if you have
+configured MySQL to listen on a public interface. moonshine_iptables[http://github.com/railsmachine/moonshine_iptables]
+is a great help, for example:
+    rules = [
+      '-A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT',
+      '-A INPUT -p icmp -j ACCEPT',
+      '-A INPUT -p tcp -m tcp --dport 22 -j ACCEPT',
+      '-A INPUT -s 127.0.0.1 -j ACCEPT'
+    ]
+    configuration[:mysql][:slaves].each do |slave|
+      rules << "-A INPUT -s #{slave} -p tcp -m tcp --dport 3306 -j ACCEPT"
+    end
+    configure(:iptables => { :rules => rules })
+    plugin :iptables
+    recipe :iptables
+Note that this example assumes that you're passing an array of internal IPs.
+Check out the source of this plugin for a hairier approach to extrapolating from
+hostnames.
+
+=== Periodic XtraBackup
+
+Optionally, you can set up cron jobs for periodic database backups. XtraBackup
+is used for initial slave setup as well, so you must install the mysql_tools
+plugin even if you don't wish to configure periodic backups.
+
+Configuration, showing the defaults:
+
+    :mysql:
+      :xtrabackup:
+        :target_dir: /srv/backups/mysql
+        :hour_interval: 4
+        :retain: 1
+        :defaults_file: /etc/mysql/my.cnf
+
+To use XtraBackup with the default settings:
+
+    :mysql:
+      :xtrabackup: true
