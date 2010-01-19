@@ -1,0 +1,14 @@
+= Moonshine_MysqlSlave
+
+=== A plugin for Moonshine[http://github.com/railsmachine/moonshine]
+
+A plugin for installing and managing mysql_slave.
+
+=== Instructions
+
+* <tt>script/plugin install git://github.com/ACCOUNT/moonshine_mysql_slave.git</tt>
+* Configure settings if needed
+    configure(:mysql_slave => {:foo => true})
+* Include the plugin and recipe(s) in your Moonshine manifest
+    plugin :mysql_slave
+    recipe :mysql_slave
