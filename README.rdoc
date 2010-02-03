@@ -22,14 +22,16 @@ If you need a more flexible configuration, patches are welcome :-)
 
 === Instructions
 
-These assume you have already have an application in production and are adding
-a slave configuration. Follow these closely -- order is significant.
+These assume you already have an application in production and are adding a
+slave configuration.
 
 * <tt>script/plugin install git://github.com/railsmachine/moonshine_mysql_slave.git</tt>
 * <tt>script/plugin install git://github.com/railsmachine/moonshine_mysql_tools.git</tt>
 * Configure settings using the <tt>mysql</tt> configuration hash -- you'll need
-  to set the IPs or hostnames of your slaves and the interface MySQL should
-  listen on for both master and slaves:
+  to set the IPs or hostnames of your slaves and the interfaces that master and
+  slave will use to communicate with one another. For the master, this will
+  become the bind-address; slaves should be read-only, so they will listen only
+  on localhost, but the specified interface will be used to set grants.
     :mysql:
       :master_interface: eth2 # these default to eth1
       :slaves_interface: eth0
@@ -40,18 +42,26 @@ a slave configuration. Follow these closely -- order is significant.
   not via the <tt>configure</tt> method in your manifest. This is the only way
   Moonshine configuration is accessible in Capistrano recipes currently.</em>
 * Edit <tt>database.yml</tt> to set your DB host to the address of the master
-  interface, if it is currently set to localhost.
+  interface, if it is currently set to localhost. Commit this if you're tracking
+  the file in revision control.
 * Include the plugin and recipe(s) in your Moonshine manifest, *before* the
   <tt>default_stack</tt> recipe is called.
     plugin :mysql_tools
     recipe :mysql_tools
     plugin :mysql_slave
     recipe :mysql_slave
-* <tt>cap deploy:setup HOSTFILTER=slave1.example.com,10.0.4.3</tt>
-* <tt>cap deploy HOSTFILTER=slave1.example.com,10.0.4.3</tt>
+* Add the following callback to your Capistrano config, either in production
+  stage config if using multistage, or <tt>deploy.rb</tt> if not.
+      after 'moonshine:configure', 'db:set_slave_servers'
+  This can't be included in the plugin without it running on all stages all the
+  time.
+* <tt>cap deploy:setup HOSTFILTER=slave1.example.com,10.0.4.3</tt> if not
+  already done.
+* <tt>cap db:replication:keys:normalize</tt>
+* <tt>cap deploy HOSTFILTER=master.example.com,slave1.example.com,10.0.4.3</tt>
+  -- This will trigger a MySQL restart if you're changing the bind address for
+  the first time.
 * <tt>cap db:replication:setup</tt> -- This will momentarily lock tables!
-* <tt>cap deploy HOSTFILTER=master-db.example.com</tt> -- This will trigger a
-  MySQL restart if you're changing the bind address for the first time.
 
 === Security
 

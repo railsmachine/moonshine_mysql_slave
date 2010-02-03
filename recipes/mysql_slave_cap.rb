@@ -1,9 +1,9 @@
 INNOBACKUP = 'innobackupex-1.5.1'
 
-# We need Moonshine config available before we can set servers.
-# Would be awesome if we could get at dynamic configuration[:mysql] stuff
-# from cap recipes too, instead of just moonshine.yml
-after 'moonshine:configure', 'db:set_slave_servers'
+# This callback should be defined in your deploy.rb or only in your production
+# multistage config if using multistage. We can't include it in the plugin
+# because there is no way to avoid it running on all stages all the time.
+#after 'moonshine:configure', 'db:set_slave_servers'
 
 namespace :moonshine do
   desc 'Apply the Moonshine manifest for this application'
@@ -50,7 +50,6 @@ namespace :db do
       # We need Net::SSH on master before manifest gets loaded to be applied
       sudo "gem install net-ssh --no-rdoc --no-ri"
 
-      keys.normalize
       transaction do
         snapshot
         scp

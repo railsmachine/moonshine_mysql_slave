@@ -22,7 +22,7 @@ module MysqlSlave
             addr = ssh.exec!(%Q|ruby -rubygems -e "require 'facter'; puts Facter.to_hash['ipaddress_#{options[:slaves_interface] || 'eth1'}']"|).strip
           end
         rescue Net::SSH::AuthenticationFailed
-          puts "\n\n*** SSH authentication failed. Did you run `cap db:replication:setup`? ***\n\n"
+          puts "\n\n*** SSH authentication failed. Did you run `cap db:replication:keys:normalize`? ***\n\n"
           raise
         end
         { :host => slave, :mysql_address => addr }
@@ -78,9 +78,10 @@ EOF
     target_dir = options[:target_dir] || '/srv/backups/mysql'
     exec 'create xtrabackups dir', :command => "mkdir -p #{target_dir}", :creates => "#{target_dir}"
     file "#{target_dir}",
-      :ensure => :directory,
-      :owner  => configuration[:user],
-      :group  => configuration[:group] || configuration[:user]
+      :ensure  => :directory,
+      :owner   => configuration[:user],
+      :group   => configuration[:group] || configuration[:user],
+      :require => exec('create xtrabackups dir')
 
     cron 'xtrabackup-snapshots',
       # Why does this package install only a version-numbered binary? Argh.
