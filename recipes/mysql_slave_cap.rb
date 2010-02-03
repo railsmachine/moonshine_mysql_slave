@@ -8,7 +8,13 @@ INNOBACKUP = 'innobackupex-1.5.1'
 namespace :moonshine do
   desc 'Apply the Moonshine manifest for this application'
   task :apply do
-    apply_db_slaves_manifest
+    # Work around stupid cap behavior if, say, you're not defining slaves in
+    # your staging environment.
+    begin
+      apply_db_slaves_manifest
+    rescue Capistrano::NoMatchingServersError
+      logger.info "skipping MySQL slave Moonshine manifest because no slave servers were defined."
+    end
     apply_application_manifest
   end
 
