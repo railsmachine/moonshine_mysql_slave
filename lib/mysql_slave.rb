@@ -85,10 +85,10 @@ EOF
 
     cron 'xtrabackup-snapshots',
       # Why does this package install only a version-numbered binary? Argh.
-      :command => "/usr/bin/innobackupex-1.5.1 --defaults-file=#{options[:defaults_file] || '/etc/mysql/my.cnf'} --stream=tar #{target_dir} | /bin/gzip - > #{target_dir}/xtrabackup_`hostname`_`date +%Y%m%d-%H%M%S`.tar.gz >> #{configuration[:deploy_to]}/current/log/cron.log 2>> #{configuration[:deploy_to]}/current/cron.error.log",
+      :command => "/usr/bin/innobackupex-1.5.1 --defaults-file=#{options[:defaults_file] || '/etc/mysql/my.cnf'} --stream=tar #{target_dir} | /bin/gzip - > #{target_dir}/xtrabackup_`hostname`_`date '+\%Y\%m\%d-\%H\%M\%S'`.tar.gz 2>> #{configuration[:deploy_to]}/current/log/cron.error.log",
       :hour => "*/#{options[:hour_interval] || 4}"
     cron 'xtrabackup-prune',
-      :command => "cd #{target_dir} && rm $(ls -t #{target_dir} | awk 'NR > #{options[:retain] || 1} { print $1 }') >> #{configuration[:deploy_to]}/current/log/cron.log 2>> #{configuration[:deploy_to]}/current/cron.error.log",
+      :command => "cd #{target_dir} && rm $(ls -t #{target_dir} | awk 'NR > #{options[:retain] || 1} { print $1 }') >> #{configuration[:deploy_to]}/current/log/cron.log 2>> #{configuration[:deploy_to]}/current/log/cron.error.log",
       :hour => "*/#{options[:hour_interval] || 4}"
   end
 
