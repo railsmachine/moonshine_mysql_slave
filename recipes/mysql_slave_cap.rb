@@ -165,7 +165,14 @@ MASTER_LOG_POS=#{fetch :binlog_position};
 SQL
 
       sudo "/usr/bin/mysql -u root -e \"#{master_host_query}\""
-      sudo "/usr/bin/mysql -u root -e 'start slave; show slave status \\G;'"
+      sudo "/usr/bin/mysql -u root -e 'start slave;'"
+      sleep 4   # give it a moment to show us something meaningful
+      status
+    end
+
+    desc "Check replication with a 'show slave status' query"
+    task :status, :roles => :db, :only => { :slave => true } do
+      sudo "/usr/bin/mysql -u root -e 'show slave status \\G;'"
     end
   end
 end
