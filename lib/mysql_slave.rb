@@ -29,11 +29,12 @@ module MysqlSlave
       end
 
       # make the master listen on the internal address
-      # TODO: I'd like to avoid hijacking the 'extra' config here, but adding a
-      # bind-interface var to core Moonshine would force mysql restart when
-      # people update -- someday with a major version bump, I guess :-/
+      # TODO: It would be nice to have a bind-interface var in core Moonshine,
+      # but adding would force mysql restart when people update -- someday with
+      # a major version bump, I guess :-/
       master_interface_address = Facter.send("ipaddress_#{options[:master_interface] || 'eth1'}")
-      configure(:mysql => { :extra => "bind-address = #{master_interface_address}" })
+      mysql_extra = configuration[:mysql][:extra] || ''
+      configure(:mysql => { :extra => mysql_extra + "\nbind-address = #{master_interface_address}" })
 
       slaves.each do |slave|
         grant = <<EOF
