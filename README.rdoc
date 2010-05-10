@@ -103,3 +103,9 @@ To use XtraBackup with the default settings:
 
     :mysql:
       :xtrabackup: true
+
+=== TODO
+
+1. Address brittle stuff that has TODO comments.
+1. cap tasks for backup restoration.
+1. Look into incremental xtrabackups -- docs are a bit weak.

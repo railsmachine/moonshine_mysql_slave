@@ -90,7 +90,7 @@ EOF
       :hour => "*/#{options[:hour_interval] || 4}",
       :minute => '0'
     cron 'xtrabackup-prune',
-      :command => "cd #{target_dir} && rm $(ls -t #{target_dir} | awk 'NR > #{options[:retain] || 1} { print $1 }') >> #{configuration[:deploy_to]}/current/log/cron.log 2>> #{configuration[:deploy_to]}/current/log/cron.error.log",
+      :command => "cd #{target_dir} && rm $(ls -t #{target_dir} | awk 'NR > #{options[:retain] || 2} { print $1 }') >> #{configuration[:deploy_to]}/current/log/cron.log 2>> #{configuration[:deploy_to]}/current/log/cron.error.log",
       :hour => "*/#{options[:hour_interval] || 4}",
       :minute => '8'
   end
