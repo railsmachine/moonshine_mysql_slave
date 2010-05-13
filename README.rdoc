@@ -55,6 +55,12 @@ slave configuration.
       after 'moonshine:configure', 'db:set_slave_servers'
   This can't be included in the plugin without it running on all stages all the
   time.
+* One more Capistrano hack: change your app's +Capfile+ as follows:
+     load 'deploy' if respond_to?(:namespace) # cap2 differentiator
+    -Dir['vendor/plugins/*/recipes/*.rb'].each { |plugin| load(plugin) }
+    +Dir['vendor/plugins/*/recipes/*.rb'].sort.each { |plugin| load(plugin) }
+     load 'config/deploy'
+  With this, Moonshine plugin cap tasks always override Moonshine core's.
 * <tt>cap deploy:setup HOSTFILTER=slave1.example.com,10.0.4.3</tt> if not
   already done.
 * <tt>cap db:replication:keys:normalize</tt>
@@ -107,5 +113,6 @@ To use XtraBackup with the default settings:
 === TODO
 
 1. Address brittle stuff that has TODO comments.
-1. cap tasks for backup restoration.
+1. cap tasks for backup restoration and repairing replication.
+1. tar4ibd?
 1. Look into incremental xtrabackups -- docs are a bit weak.
