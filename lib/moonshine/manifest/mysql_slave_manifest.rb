@@ -14,9 +14,7 @@ class MysqlSlaveManifest < Moonshine::Manifest::Rails
   end
   configure(:mysql => { :server_id => server_id })
 
-  plugin :mysql_tools
   recipe :mysql_tools
-  plugin :mysql_slave
   recipe :mysql_slave
 
   # the gem is required for the server recipe, kind of annoying
