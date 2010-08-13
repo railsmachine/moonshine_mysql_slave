@@ -20,5 +20,5 @@ class MysqlSlaveManifest < Moonshine::Manifest::Rails
   # the gem is required for the server recipe, kind of annoying
   recipe :mysql_server, :mysql_gem, :mysql_fixup_debian_start
   recipe :ntp, :time_zone, :postfix, :cron_packages, :motd, :security_updates
-  recipe :rails_gems
+  recipe :rails_gems, :rails_directories
 end

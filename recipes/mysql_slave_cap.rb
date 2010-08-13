@@ -154,6 +154,8 @@ namespace :db do
 
     desc "[internal] Start slave. Depends on :snapshot task to set binlog params"
     task :start_slave, :roles => :db, :only => { :slave => true } do
+      # FIXME: this breaks for case like database.production.yml being copied
+      # into place later in the deploy
       db_config = YAML.load_file(File.join(File.dirname(__FILE__), '..', '..', '..', '..', 'config', 'database.yml'))
       rails_env = fetch(:rails_env, 'production')
       master_host_query = <<SQL

@@ -9,8 +9,11 @@ module MysqlSlave
   def mysql_slave(options={})
     options = (configuration[:mysql]||{}).merge(options)
 
-    # Master-only bits
-    if !(options[:slaves].include?(Facter.fqdn) || options[:slaves].include?(Facter.ipaddress))
+    # Slave-only bits
+    if (options[:slaves].include?(Facter.fqdn) || options[:slaves].include?(Facter.ipaddress))
+      # TODO: only on one slave?
+      xtrabackup(options[:xtrabackup]) if options[:xtrabackup]
+    else # master
       require 'net/ssh'
 
       # Replication grants
@@ -67,15 +70,13 @@ EOF
         :unless  => "mysqlshow -u#{database_environment[:username]} -p#{database_environment[:password]} -h#{master_interface_address} #{database_environment[:database]}",
         :require => exec('mysql_database'),
         :before  => exec('rake tasks')
-    else # slave
-      # XtraBackup. Should only run on slaves.
-      options[:xtrabackup] = {} if options[:xtrabackup] == true
-      _xtrabackup(options[:xtrabackup]) if options[:xtrabackup]
     end
   end
 
+private
   # The moonshine_mysql_tools plugin installs xtrabackup
-  def _xtrabackup(options={})
+  def xtrabackup(options={})
+    options = {} if options == true
     target_dir = options[:target_dir] || '/srv/backups/mysql'
     exec 'create xtrabackups dir', :command => "mkdir -p #{target_dir}", :creates => "#{target_dir}"
     file "#{target_dir}",
