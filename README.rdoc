@@ -45,9 +45,7 @@ slave configuration.
   the file in revision control.
 * Include the plugin and recipe(s) in your Moonshine manifest, *before* the
   <tt>default_stack</tt> recipe is called.
-    plugin :mysql_tools
     recipe :mysql_tools
-    plugin :mysql_slave
     recipe :mysql_slave
 * Add the following callback to your Capistrano config, either in production
   stage config if using multistage, or <tt>deploy.rb</tt> if not.
@@ -108,6 +106,21 @@ To use XtraBackup with the default settings:
 
     :mysql:
       :xtrabackup: true
+
+=== Manual Bind Addresses
+
+There are a couple of obscure options available for manually specifying the
+bind-address for both master and slave MySQL configs, instead of relying on the
+plugin's smarts. These were added primarily for the use case of forcing bind
+addresses to 0.0.0.0 (listening on all interfaces), to facilitate migrating to
+MySQL Multi-Master. With MMM, the IP address MySQL listens on may change
+dynamically, and 0.0.0.0 is the only 'wildcard' mechanism MySQL supports for
+this. You generally shouldn't need to do this, and you should be doubly sure
+that your iptables configuration is tight if you do!
+
+    :mysql:
+      :master_bind_address: 0.0.0.0
+      :slaves_bind_address: 0.0.0.0
 
 === TODO
 

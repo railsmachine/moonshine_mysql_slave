@@ -28,6 +28,18 @@ describe "A manifest with the MysqlSlave plugin" do
     end
   end
 
+  describe "on master with a manually configured bind-address" do
+    before(:each) do
+      @manifest.configure(:mysql => { :master_bind_address => '0.0.0.0' })
+      mock_master
+      @manifest.mysql_slave
+    end
+
+    it "should use the bind-address" do
+      @manifest.configuration[:mysql][:extra].should match /bind-address = 0.0.0.0/
+    end
+  end
+
   describe "on slave(s)" do
     before(:each) do
       mock_slave

@@ -38,8 +38,9 @@ module Moonshine
           # but adding would force mysql restart when people update -- someday with
           # a major version bump, I guess :-/
           master_interface_address = Facter.send("ipaddress_#{options[:master_interface] || 'eth1'}")
+          master_bind_address = configuration[:mysql][:master_bind_address] || master_interface_address
           mysql_extra = configuration[:mysql][:extra] || ''
-          configure(:mysql => { :extra => mysql_extra + "\nbind-address = #{master_interface_address}" })
+          configure(:mysql => { :extra => mysql_extra + "\nbind-address = #{master_bind_address}" })
 
           slaves.each do |slave|
             grant = <<EOF

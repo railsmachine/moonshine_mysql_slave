@@ -3,7 +3,8 @@ class MysqlSlaveManifest < Moonshine::Manifest::Rails
   # satisfy Moonshine's requirements for mysql gem, but stub out rails app gems
   configure(:gems => false)
 
-  bind_address = Facter.send("ipaddress_#{configuration[:mysql][:slaves_interface] || 'eth1'}")
+  bind_address = configuration[:mysql][:slaves_bind_address] ||
+                 Facter.send("ipaddress_#{configuration[:mysql][:slaves_interface] || 'eth1'}")
   mysql_extra = configuration[:mysql][:extra] || ''
   configure(:mysql => { :extra => mysql_extra + "\nbind-address = #{bind_address}" })
 
