@@ -29,9 +29,8 @@ slave configuration.
 * <tt>script/plugin install git://github.com/railsmachine/moonshine_mysql_tools.git</tt>
 * Configure settings using the <tt>mysql</tt> configuration hash -- you'll need
   to set the IPs or hostnames of your slaves and the interfaces that master and
-  slave will use to communicate with one another. For the master, this will
-  become the bind-address; slaves should be read-only, so they will listen only
-  on localhost, but the specified interface will be used to set grants.
+  slave will use to communicate with one another. The interfaces will be used to
+  determine grants and bind-address settings.
     :mysql:
       :master_interface: eth2 # these default to eth1
       :slaves_interface: eth0
@@ -40,7 +39,7 @@ slave configuration.
         - 10.0.4.3
   <em>NOTE: Currently you must configure the slaves array in <tt>moonshine.yml</tt>,
   not via the <tt>configure</tt> method in your manifest. This is the only way
-  Moonshine configuration is accessible in Capistrano recipes currently.</em>
+  Moonshine configuration is accessible in Capistrano recipes at this time.</em>
 * Edit <tt>database.yml</tt> to set your DB host to the address of the master
   interface, if it is currently set to localhost. Commit this if you're tracking
   the file in revision control.
