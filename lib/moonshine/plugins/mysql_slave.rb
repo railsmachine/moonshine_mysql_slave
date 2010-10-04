@@ -24,7 +24,7 @@ module Moonshine
             addr = nil
             begin
               Net::SSH.start(slave, configuration[:user]) do |ssh|
-                addr = ssh.exec!(%Q|ruby -rubygems -e "require 'facter'; puts Facter.to_hash['ipaddress_#{options[:slaves_interface] || 'eth1'}']"|).strip
+                addr = ssh.exec!(%Q|ruby -rubygems -e "require 'facter'; puts Facter.to_hash['ipaddress_#{options[:slaves_interface] || 'eth1'}']" 2> /dev/null|).strip
               end
             rescue Net::SSH::AuthenticationFailed
               puts "\n\n*** SSH authentication failed. Did you run `cap db:replication:keys:normalize`? ***\n\n"
