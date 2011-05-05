@@ -140,6 +140,7 @@ namespace :db do
       end
 
       sudo 'service mysql stop'
+      sudo 'rm -rf /var/lib/mysql.old'
       sudo 'mv /var/lib/mysql /var/lib/mysql.old'
       sudo 'mkdir /var/lib/mysql'
 
