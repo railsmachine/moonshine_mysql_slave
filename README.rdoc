@@ -49,7 +49,7 @@ slave configuration.
     recipe :mysql_slave
 * Add the following callback to your Capistrano config, either in production
   stage config if using multistage, or <tt>deploy.rb</tt> if not.
-      after 'moonshine:configure', 'db:set_slave_servers'
+      after 'moonshine:configure_stage', 'db:set_slave_servers'
   This can't be included in the plugin without it running on all stages all the
   time.
 * One more Capistrano hack: change your app's +Capfile+ as follows:
