@@ -74,10 +74,10 @@ namespace :db do
       # task can do this so start_slave etc. can be used without a new snapshot
       sudo "#{INNOBACKUP} --defaults-file=#{mysql_defaults} #{xtra_scratch}" do |ch, stream, data|
         logger.info "[#{stream} :: #{ch[:host]}] #{data}"
-        case data
-        when /Backup created in directory \'(.*)\'/
+        if data.match /Backup created in directory \'(.*)\'/
           set :latest_backup, $1.split('/').last
-        when /MySQL binlog position: filename \'(.*)\', position (\d*)/
+        end
+        if data.match /MySQL binlog position: filename \'(.*)\', position (\d*)/
           set :binlog_file, $1
           set :binlog_position, $2
         end
