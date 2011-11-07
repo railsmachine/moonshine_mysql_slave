@@ -23,7 +23,7 @@ module Moonshine
             # Ugh, we really want iptables to be able to get these IPs easily too
             addr = nil
             begin
-              Net::SSH.start(slave, configuration[:user]) do |ssh|
+              Net::SSH.start(slave, configuration[:user], options={:port => configuration[:ssh][:port]||22}) do |ssh|
                 addr = ssh.exec!(%Q|ruby -rubygems -e "require 'facter'; puts Facter.to_hash['ipaddress_#{options[:slaves_interface] || 'eth1'}']" 2> /dev/null|).strip
               end
             rescue Net::SSH::AuthenticationFailed
