@@ -16,22 +16,8 @@ module Moonshine
           # TODO: only on one slave?
           xtrabackup(options[:xtrabackup]) if options[:xtrabackup]
         else # master
-          require 'net/ssh'
-
           # Replication grants
-          slaves = options[:slaves].map do |slave|
-            # Ugh, we really want iptables to be able to get these IPs easily too
-            addr = nil
-            begin
-              Net::SSH.start(slave, configuration[:user], options={:port => configuration[:ssh][:port]||22}) do |ssh|
-                addr = ssh.exec!(%Q|ruby -rubygems -e "require 'facter'; puts Facter.to_hash['ipaddress_#{options[:slaves_interface] || 'eth1'}']" 2> /dev/null|).strip
-              end
-            rescue Net::SSH::AuthenticationFailed
-              puts "\n\n*** SSH authentication failed. Did you run `cap db:replication:keys:normalize`? ***\n\n"
-              raise
-            end
-            { :host => slave, :mysql_address => addr }
-          end
+          slaves = build_mysql_slave_info(options[:slaves])
 
           # make the master listen on the internal address
           # TODO: It would be nice to have a bind-interface var in core Moonshine,
@@ -77,6 +63,26 @@ EOF
       end
 
     private
+    
+      def build_mysql_slave_info(slaves)
+        require 'net/ssh'
+
+        slaves.map do |slave|
+          # Ugh, we really want iptables to be able to get these IPs easily too
+          addr = nil
+          begin
+            Net::SSH.start(slave, configuration[:user]) do |ssh|
+              addr = ssh.exec!(%Q|ruby -rubygems -e "require 'facter'; puts Facter.to_hash['ipaddress_#{options[:slaves_interface] || 'eth1'}']" 2> /dev/null|).strip
+            end  
+          rescue Net::SSH::AuthenticationFailed
+            puts "\n\n*** SSH authentication failed. Did you run `cap db:replication:keys:normalize`? ***\n\n"
+            raise
+          end  
+          { :host => slave, :mysql_address => addr }
+        end  
+
+      end
+      
       # The moonshine_mysql_tools plugin installs xtrabackup
       def xtrabackup(options={})
         options = {} if options == true
