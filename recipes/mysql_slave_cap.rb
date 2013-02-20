@@ -122,11 +122,11 @@ namespace :db do
     desc "[internal] Copy latest innobackupex backup by SCP to slaves."
     task :scp, :roles => :db, :only => { :primary => true } do
       mysql[:slaves].each do |slave|
-        run "ssh #{slave} 'mkdir -p #{xtra_scratch}'" do |ch, stream, data|
+        run "ssh #{slave} -p #{ssh_options[:port] || 22} 'mkdir -p #{xtra_scratch}'" do |ch, stream, data|
           # pesky SSH fingerprint prompts
           ch.send_data("yes\n") if data =~ %r{\(yes/no\)}
         end
-        run "scp -r #{xtra_scratch}/#{latest_backup} #{slave}:#{xtra_scratch}"
+        run "scp -P #{ssh_options[:port] || 22} -r #{xtra_scratch}/#{latest_backup} #{slave}:#{xtra_scratch}"
       end
     end
 
