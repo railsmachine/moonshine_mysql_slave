@@ -158,7 +158,7 @@ namespace :db do
       # FIXME: this breaks for case like database.production.yml being copied
       # into place later in the deploy
       db_config = YAML.load_file(File.join(File.dirname(__FILE__), '..', '..', '..', '..', 'config', 'database.yml'))
-      rails_env = fetch(:rails_env, 'production')
+      rails_env = fetch(:rails_env, 'production').to_s
       master_host_query = <<SQL
 CHANGE MASTER TO MASTER_HOST='#{db_config[rails_env]['host']}',
 MASTER_USER='repl',
