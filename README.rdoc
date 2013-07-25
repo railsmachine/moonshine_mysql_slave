@@ -60,6 +60,8 @@ slave configuration.
   With this, Moonshine plugin cap tasks always override Moonshine core's.
 * <tt>cap deploy:setup HOSTFILTER=slave1.example.com,10.0.4.3</tt> if not
   already done.
+* <tt>cap moonshine_mysql_slave:setup</tt> if the server has already been
+  deploy:setup'd.
 * <tt>cap db:replication:keys:normalize</tt>
 * <tt>cap deploy HOSTFILTER=master.example.com,slave1.example.com,10.0.4.3</tt>
   -- This will trigger a MySQL restart if you're changing the bind address for
