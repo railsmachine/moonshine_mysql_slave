@@ -27,6 +27,15 @@ namespace :moonshine do
   end
 end
 
+namespace :moonshine_mysql_slave do
+  desc 'Install moonshine_mysql_slave dependencies'
+  task :setup, :roles => :db, :only => { :primary => true } do
+    # We need Net::SSH on master before manifest gets loaded to be applied
+    sudo "gem install net-ssh --no-rdoc --no-ri"
+  end
+end
+after "deploy:setup", "moonshine_mysql_slave:setup"
+
 namespace :db do
   desc "[internal] Sets capistrano servers for Moonshine-defined DB slaves"
   task :set_slave_servers do
