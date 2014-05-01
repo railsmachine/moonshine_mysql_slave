@@ -31,13 +31,14 @@ slave configuration.
   to set the IPs or hostnames of your slaves and the interfaces that master and
   slave will use to communicate with one another. The interfaces will be used to
   determine grants and bind-address settings.
-<pre><code>:mysql:
+```
+:mysql:
   :master_interface: eth2 # these default to eth1
   :slaves_interface: eth0
   :slaves:
     - slave1.example.com
     - 10.0.4.3
-</code></pre>
+```
   <em>NOTE: Currently you must configure the slaves array in <tt>moonshine.yml</tt>,
   not via the <tt>configure</tt> method in your manifest. This is the only way
   Moonshine configuration is accessible in Capistrano recipes at this time.</em>
