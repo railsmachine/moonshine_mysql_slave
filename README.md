@@ -32,11 +32,11 @@ slave configuration.
   slave will use to communicate with one another. The interfaces will be used to
   determine grants and bind-address settings.
 <pre><code>:mysql:
-      :master_interface: eth2 # these default to eth1
-      :slaves_interface: eth0
-      :slaves:
-        - slave1.example.com
-        - 10.0.4.3
+  :master_interface: eth2 # these default to eth1
+  :slaves_interface: eth0
+  :slaves:
+    - slave1.example.com
+    - 10.0.4.3
 </code></pre>
   <em>NOTE: Currently you must configure the slaves array in <tt>moonshine.yml</tt>,
   not via the <tt>configure</tt> method in your manifest. This is the only way
@@ -55,9 +55,8 @@ slave configuration.
   time.
 - One more Capistrano hack: change your app's +Capfile+ as follows:
 <pre><code>load 'deploy' if respond_to?(:namespace) # cap2 differentiator
-    -Dir['vendor/plugins/*/recipes/*.rb'].each { |plugin| load(plugin) }
-    +Dir['vendor/plugins/*/recipes/*.rb'].sort.each { |plugin| load(plugin) }
-     load 'config/deploy'
+Dir['vendor/plugins/*/recipes/*.rb'].sort.each { |plugin| load(plugin) }
+load 'config/deploy'
 </code></pre>
   With this, Moonshine plugin cap tasks always override Moonshine core's.
 - <tt>cap deploy:setup HOSTFILTER=slave1.example.com,10.0.4.3</tt> if not
@@ -76,17 +75,17 @@ We *strongly* recommend that you configure a firewall, especially if you have
 configured MySQL to listen on a public interface. [moonshine_iptables](http://github.com/railsmachine/moonshine_iptables)
 is a great help, for example:
 <pre><code>rules = [
-      '-A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT',
-      '-A INPUT -p icmp -j ACCEPT',
-      '-A INPUT -p tcp -m tcp --dport 22 -j ACCEPT',
-      '-A INPUT -s 127.0.0.1 -j ACCEPT'
-    ]
-    configuration[:mysql][:slaves].each do |slave|
-      rules << "-A INPUT -s #{slave} -p tcp -m tcp --dport 3306 -j ACCEPT"
-    end
-    configure(:iptables => { :rules => rules })
-    plugin :iptables
-    recipe :iptables
+  '-A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT',
+  '-A INPUT -p icmp -j ACCEPT',
+  '-A INPUT -p tcp -m tcp --dport 22 -j ACCEPT',
+  '-A INPUT -s 127.0.0.1 -j ACCEPT'
+]
+configuration[:mysql][:slaves].each do |slave|
+  rules << "-A INPUT -s #{slave} -p tcp -m tcp --dport 3306 -j ACCEPT"
+end
+configure(:iptables => { :rules => rules })
+plugin :iptables
+recipe :iptables
 </code></pre>
 Note that this example assumes that you're passing an array of internal IPs.
 Check out the source of this plugin for a hairier approach to extrapolating from
@@ -100,15 +99,15 @@ plugin even if you don't wish to configure periodic backups.
 
 Configuration, showing the defaults:
 <pre><code>:mysql:
-      :xtrabackup:
-        :target_dir: /srv/backups/mysql
-        :hour_interval: 4
-        :retain: 1
-        :defaults_file: /etc/mysql/my.cnf
+  :xtrabackup:
+    :target_dir: /srv/backups/mysql
+    :hour_interval: 4
+    :retain: 1
+    :defaults_file: /etc/mysql/my.cnf
 </code></pre>
 To use XtraBackup with the default settings:
 <pre><code>:mysql:
-      :xtrabackup: true
+  :xtrabackup: true
 </code></pre>
 ### Manual Bind Addresses
 
@@ -121,8 +120,8 @@ dynamically, and 0.0.0.0 is the only 'wildcard' mechanism MySQL supports for
 this. You generally shouldn't need to do this, and you should be doubly sure
 that your iptables configuration is tight if you do!
 <pre><code>:mysql:
-      :master_bind_address: 0.0.0.0
-      :slaves_bind_address: 0.0.0.0
+  :master_bind_address: 0.0.0.0
+  :slaves_bind_address: 0.0.0.0
 </code></pre>
 ### TODO
 
