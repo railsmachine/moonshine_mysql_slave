@@ -10,7 +10,7 @@ well as online, non-blocking snapshot back-ups with [XtraBackup](http://www.perc
 Currently this plugin operates on a few assumptions:
 
 1. The master and all slaves are accessible to Capistrano either publicly or
-   through a gateway[http://weblog.jamisbuck.org/2006/9/26/inside-capistrano-the-gateway-implementation]
+   through a [gateway](http://weblog.jamisbuck.org/2006/9/26/inside-capistrano-the-gateway-implementation)
    that you have already configured. You may specify IPs or hostnames for the
    slaves.
 1. The slaves use a consistent interface for the network over which they
@@ -31,8 +31,7 @@ slave configuration.
   to set the IPs or hostnames of your slaves and the interfaces that master and
   slave will use to communicate with one another. The interfaces will be used to
   determine grants and bind-address settings.
-<pre><code>
-    :mysql:
+<pre><code>:mysql:
       :master_interface: eth2 # these default to eth1
       :slaves_interface: eth0
       :slaves:
@@ -55,8 +54,7 @@ slave configuration.
   This can't be included in the plugin without it running on all stages all the
   time.
 - One more Capistrano hack: change your app's +Capfile+ as follows:
-<pre><code>
-     load 'deploy' if respond_to?(:namespace) # cap2 differentiator
+<pre><code>load 'deploy' if respond_to?(:namespace) # cap2 differentiator
     -Dir['vendor/plugins/*/recipes/*.rb'].each { |plugin| load(plugin) }
     +Dir['vendor/plugins/*/recipes/*.rb'].sort.each { |plugin| load(plugin) }
      load 'config/deploy'
@@ -77,8 +75,7 @@ slave configuration.
 We *strongly* recommend that you configure a firewall, especially if you have
 configured MySQL to listen on a public interface. [moonshine_iptables](http://github.com/railsmachine/moonshine_iptables)
 is a great help, for example:
-<pre><code>
-    rules = [
+<pre><code>rules = [
       '-A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT',
       '-A INPUT -p icmp -j ACCEPT',
       '-A INPUT -p tcp -m tcp --dport 22 -j ACCEPT',
@@ -102,8 +99,7 @@ is used for initial slave setup as well, so you must install the mysql_tools
 plugin even if you don't wish to configure periodic backups.
 
 Configuration, showing the defaults:
-<pre><code>
-    :mysql:
+<pre><code>:mysql:
       :xtrabackup:
         :target_dir: /srv/backups/mysql
         :hour_interval: 4
@@ -111,8 +107,7 @@ Configuration, showing the defaults:
         :defaults_file: /etc/mysql/my.cnf
 </code></pre>
 To use XtraBackup with the default settings:
-<pre><code>
-    :mysql:
+<pre><code>:mysql:
       :xtrabackup: true
 </code></pre>
 ### Manual Bind Addresses
@@ -125,8 +120,7 @@ MySQL Multi-Master. With MMM, the IP address MySQL listens on may change
 dynamically, and 0.0.0.0 is the only 'wildcard' mechanism MySQL supports for
 this. You generally shouldn't need to do this, and you should be doubly sure
 that your iptables configuration is tight if you do!
-<pre><code>
-    :mysql:
+<pre><code>:mysql:
       :master_bind_address: 0.0.0.0
       :slaves_bind_address: 0.0.0.0
 </code></pre>
