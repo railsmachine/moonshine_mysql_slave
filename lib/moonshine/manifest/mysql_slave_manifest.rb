@@ -4,7 +4,7 @@ class MysqlSlaveManifest < Moonshine::Manifest::Rails
   configure(:gems => false)
 
   bind_address = configuration[:mysql][:slaves_bind_address] ||
-                 Facter.send("ipaddress_#{configuration[:mysql][:slaves_interface] || 'eth1'}")
+    Facter.value("ipaddress_#{configuration[:mysql][:slaves_interface] || 'eth1'}".to_sym)
   mysql_extra = configuration[:mysql][:extra] || ''
   configure(:mysql => { :extra => mysql_extra + "\nbind-address = #{bind_address}" })
 
@@ -12,9 +12,9 @@ class MysqlSlaveManifest < Moonshine::Manifest::Rails
   slaves_interface = configuration[:mysql][:slaves_interface] || 'eth1'
   server_id = nil
   configuration[:mysql][:slaves].each_with_index do |slave, i|
-    server_id = i+2 if Facter.fqdn == slave ||
-                       Facter.ipaddress == slave ||
-                       Facter.send("ipaddress_#{slaves_interface}") == slave
+    server_id = i+2 if Facter.value(:fqdn) == slave ||
+                       Facter.value(:ipaddress) == slave ||
+                       Facter.value("ipaddress_#{slaves_interface}".to_sym) == slave
     break if server_id
   end
   configure(:mysql => { :server_id => server_id })

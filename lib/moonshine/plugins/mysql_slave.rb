@@ -12,7 +12,7 @@ module Moonshine
         options = (configuration[:mysql]||{}).merge(options)
 
         # Slave-only bits
-        if (options[:slaves].include?(Facter.fqdn) || options[:slaves].include?(Facter.ipaddress))
+        if (options[:slaves].include?(Facter.value(:fqdn)) || options[:slaves].include?(Facter.value(:ipaddress)))
           # TODO: only on one slave?
           xtrabackup(options[:xtrabackup]) if options[:xtrabackup]
         else # master
@@ -23,7 +23,7 @@ module Moonshine
           # TODO: It would be nice to have a bind-interface var in core Moonshine,
           # but adding would force mysql restart when people update -- someday with
           # a major version bump, I guess :-/
-          master_interface_address = Facter.send("ipaddress_#{options[:master_interface] || 'eth1'}")
+          master_interface_address = Facter.value("ipaddress_#{options[:master_interface] || 'eth1'}".to_sym)
           master_bind_address = configuration[:mysql][:master_bind_address] || master_interface_address
           mysql_extra = configuration[:mysql][:extra] || ''
           configure(:mysql => { :extra => mysql_extra + "\nbind-address = #{master_bind_address}" })
@@ -63,7 +63,7 @@ EOF
       end
 
     private
-    
+
       def build_mysql_slave_info(slaves)
         require 'net/ssh'
 
@@ -73,16 +73,16 @@ EOF
           begin
             Net::SSH.start(slave, configuration[:user]) do |ssh|
               addr = ssh.exec!(%Q|ruby -rubygems -e "require 'facter'; puts Facter.to_hash['ipaddress_#{options[:slaves_interface] || 'eth1'}']" 2> /dev/null|).strip
-            end  
+            end
           rescue Net::SSH::AuthenticationFailed
             puts "\n\n*** SSH authentication failed. Did you run `cap db:replication:keys:normalize`? ***\n\n"
             raise
-          end  
+          end
           { :host => slave, :mysql_address => addr }
-        end  
+        end
 
       end
-      
+
       # The moonshine_mysql_tools plugin installs xtrabackup
       def xtrabackup(options={})
         options = {} if options == true
